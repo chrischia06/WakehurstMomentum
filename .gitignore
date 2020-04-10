@@ -1,0 +1,10 @@
+.DS_Store
+*.csv
+.ipynb_checkpoints
+backtestResults/
+data/
+*.log
+
+
+
+
