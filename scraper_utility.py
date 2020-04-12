@@ -28,33 +28,32 @@ def scrape(urls, start_date, end_date):
 	for i, url in enumerate(urls):
 		print(f"Current URL: {url}")
 		driver.get(url)
-		if i == 0:
-			#a GDPR accept cookies pops up the first time, we need to close it
-			try:
-				value = WebDriverWait(driver,10).until(EC.presence_of_element_located((By.XPATH, "//*[contains(@id, 'pop-frame')]")))
-				driver.switch_to.frame(value)
-				WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a.call'))).click()
-				driver.switch_to.default_content()
-				print("Closed GDPR")
-			except:
-				print("Failed to close GDPR")
-			#sometimes a ad pops up
-			try:
-				element_2 = driver.find_element_by_css_selector('i.popupCloseIcon.largeBannerCloser').click()
-				print("Closed Popup")
-			except:
-				print("no popup yet")
-			#login
-			try:
-				WebDriverWait(driver,5).until(EC.element_to_be_clickable((By.CLASS_NAME, 'login')))
-				driver.find_element_by_class_name('login').click()
-				element = driver.find_element_by_id('loginFormUser_email')
-				element.send_keys('todustandtozero@gmail.com')
-				element2 = driver.find_element_by_id('loginForm_password')
-				element2.send_keys('pass1234',Keys.RETURN)
-				print("Logged in ")
-			except:
-				print("Could not login")
+		#a GDPR accept cookies pops up the first time, we need to close it
+		try:
+			value = WebDriverWait(driver,3).until(EC.presence_of_element_located((By.XPATH, "//*[contains(@id, 'pop-frame')]")))
+			driver.switch_to.frame(value)
+			WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a.call'))).click()
+			driver.switch_to.default_content()
+			print("Closed GDPR")
+		except:
+			print("Failed to close GDPR")
+		#sometimes a ad pops up
+		try:
+			element_2 = driver.find_element_by_css_selector('i.popupCloseIcon.largeBannerCloser').click()
+			print("Closed Popup")
+		except:
+			print("no popup yet")
+		#login
+		try:
+			WebDriverWait(driver,3).until(EC.element_to_be_clickable((By.CLASS_NAME, 'login')))
+			driver.find_element_by_class_name('login').click()
+			element = driver.find_element_by_id('loginFormUser_email')
+			element.send_keys('todustandtozero@gmail.com')
+			element2 = driver.find_element_by_id('loginForm_password')
+			element2.send_keys('pass1234',Keys.RETURN)
+			print("Logged in ")
+		except:
+			print("Could not login")
 
 
 		#set start and end date

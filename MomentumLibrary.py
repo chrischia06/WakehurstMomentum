@@ -43,12 +43,30 @@ def statistics(df):
     sm.graphics.tsa.plot_pacf(df['log_returns'].values.squeeze(),lags=list(range(1,60,1)),ax=ax[2])
     return ax
 
-with open("../assets.json") as f:
-    assets = json.load(f)
+try:
+    with open("../assets.json") as f:
+        assets = json.load(f)
+except:
+    try:
+        with open("assets.json") as f:
+            assets = json.load(f)
+    except:
+        print("Failed to load assets file")
+
 
 datasets = widgets.Dropdown(
     options=list(assets.keys()),
-    value='Brent Oil Futures Historical Data',
+    value='Brent Oil Futures',
     description='Asset:',
     disabled=False,
 )
+
+def makeWidget(df3, exog_name):
+    featsToUseWidget = widgets.SelectMultiple(
+        options=df3.drop('Date',axis=1).columns,
+        value=[exog_name],
+        #rows=10,
+        description='Variables',
+        disabled=False
+    )
+    return featsToUseWidget

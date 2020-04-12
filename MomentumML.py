@@ -26,15 +26,16 @@ from tensorflow.keras.regularizers import l1, l2
 import shap
 import json
 
-def modelHistoricPredsWriter(preds, path=""):
+def modelHistoricPredsWriter(preds, asset, ID, path=""):
     temp = pd.json_normalize(preds)
-    temp['asset'] = dataset.value
+    temp['asset'] = asset
     temp['date'] = pd.to_datetime(datetime.now())
     temp['forecast_var'] = param
     temp['train_end'] = train_end
     temp['train_start'] = train_start
     temp['LAGS'] = LAGS
     temp['hyperParams'] = str(hyperParams)
+    temp['trainPerformanceID'] = ID
     try:
         modelHistory = pd.read_csv(f'{path}modelHistory.csv')
         modelHistory = pd.concat([modelHistory,temp],axis=0).reset_index(drop=True).drop_duplicates()
@@ -278,7 +279,7 @@ def classificationDiagnosis(y_actual, y_pred, y_proba, verbose=False):
 
 def featImportances(models,data_tree, data, param):
     featImportances  = {}
-    fig, ax = plt.subplots(figsize=(10,30),nrows=4)
+    fig, ax = plt.subplots(figsize=(10,40),nrows=4)
 
     if param == 'direction':
         mode = 'classification'
@@ -289,20 +290,20 @@ def featImportances(models,data_tree, data, param):
         featImportances['linear_reg'] = dict(sorted(zip(list(data['X_train'].columns), models['linear_reg'].coef_), key = lambda k : abs(k[1])))
         featImportances['cbr'] = dict(sorted(zip(list(data_tree['X_train'].columns), models['cbr'].get_feature_importance()), key = lambda k : k[1]))
         featImportances['ensemble'] = dict(sorted(zip(list(data_tree['ensemble_train'].columns), models['ensemble'].get_feature_importance()), key = lambda k : k[1]))
-        ax[0].barh(list(featImportances['linear_reg'].keys()), list(featImportances['linear_reg'].values()))
+        ax[0].barh(list(featImportances['linear_reg'].keys())[:20], list(featImportances['linear_reg'].values())[:20])
         ax[0].set_title("Linear Regression Coefficients")
-        ax[1].barh(list(featImportances['cbr'].keys()), list(featImportances['cbr'].values()))
-        ax[2].barh(list(featImportances['ensemble'].keys()), list(featImportances['ensemble'].values()))
-        xgb.plot_importance(models['xgbr'], ax[3], title='XGBoost Feature Importance')
+        ax[1].barh(list(featImportances['cbr'].keys())[:20], list(featImportances['cbr'].values())[:20])
+        ax[2].barh(list(featImportances['ensemble'].keys())[:20], list(featImportances['ensemble'].values())[:20])
+        xgb.plot_importance(models['xgbr'], ax[3], max_num_features=20,title='XGBoost Feature Importance')
     elif mode == 'classification':
         featImportances['logit'] = dict(sorted(zip(list(data['X_train'].columns), models['logit'].coef_[0]), key = lambda k : abs(k[1])))
         featImportances['cbc'] = dict(sorted(zip(list(data_tree['X_train'].columns), models['cbc'].get_feature_importance()), key = lambda k : k[1]))
         featImportances['ensemble'] = dict(sorted(zip(list(data_tree['ensemble_train'].columns), models['ensemble'].get_feature_importance()), key = lambda k : k[1]))
-        ax[0].barh(list(featImportances['logit'].keys()), list(featImportances['logit'].values()))
+        ax[0].barh(list(featImportances['logit'].keys())[:20], list(featImportances['logit'].values())[:20])
         ax[0].set_title("Logistic Regression coefficients")
-        ax[1].barh(list(featImportances['cbc'].keys()), list(featImportances['cbc'].values()))
-        ax[2].barh(list(featImportances['ensemble'].keys()), list(featImportances['ensemble'].values()))
-        xgb.plot_importance(models['xgbc'], ax[3], title='XGBoost Feature Importance')
+        ax[1].barh(list(featImportances['cbc'].keys())[:20], list(featImportances['cbc'].values())[:20])
+        ax[2].barh(list(featImportances['ensemble'].keys())[:20], list(featImportances['ensemble'].values())[:20])
+        xgb.plot_importance(models['xgbc'], ax[3], max_num_features=20, title='XGBoost Feature Importance')
     ax[1].set_title("Catboost Feature Importance")
     ax[2].set_title("Ensemble Feature Importance")
     return ax
@@ -509,22 +510,6 @@ def recommendTrade(data_tree, data, models, param, swap=False):
     return preds
         
 
-
-
-# def createTrainTest2(WINDOW, test_size, df):
-#     # X = df[['XM1_Comdty','YM1_Comdty']].values[2:]
-#     X2 = np.zeros((df.shape[0]-WINDOW, WINDOW, 3))
-#     for i in range(WINDOW,df.shape[0]):
-#         X2[i-WINDOW] = df[i-WINDOW:i]
-
-#     y1 = df[WINDOW:]
-
-#     X_train,X_test, y_train, y_test = train_test_split(X2, y1, test_size=test_size, shuffle=False)
-#     return X_train,X_test, y_train, y_test
-    
-
-
-
 def shapPlotter(models, model, data_tree, data):
     if model in set({'xgbc','xgbr'}):
         explainer = shap.TreeExplainer(models[model])
@@ -547,22 +532,3 @@ def shapPlotter(models, model, data_tree, data):
         shap_values = models[model].get_feature_importance(data=Pool(data_tree['last'],cat_features=['day','month','weekday','cluster']),type='ShapValues')
         return shap.force_plot(explainer.expected_value,shap_values[0][:-1], data_tree['last'])
         
-
-def statistics(df):
-    print("HISTORICAL DATA STATISTICS")
-    print("--------------------")
-    print(f"Number of days: {df.shape[0]}")
-    print("Data Start:",df['Date'].iloc[0])
-    print("Data End:", df['Date'].iloc[-1])
-    print(f"Mean Returns: {(df['returns'].mean()-1):.6f}")
-    print(f"Mean Vol (Returns): {(df['returns'].std()):.6f}")
-    print(f"Test for stationarity of returns: p-value - {adfuller(df['returns'].iloc[1:])[1]}")
-    print(f"Test for stationarity of price: p-value - {adfuller(df['Price'].iloc[1:])[1]}")
-    
-    
-    #TODO - Test for normality
-    print(f"Kurtosis of Returns: {df2['log_returns'].kurtosis()}")
-    print(f"Skew of Returns: {df2['log_returns'].skew()}")
-
-    print("--------------------")
-    return

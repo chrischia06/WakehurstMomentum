@@ -5,7 +5,7 @@ from scipy.stats import binom
 import plotly.graph_objects as go
 from datetime import datetime, date
 
-def backtestLogger(models, data_tree, data, param, swap,write=False,verbose=False):
+def backtestLogger(models, data_tree, data, param, swap, ID, write=False,verbose=False):
     print("BACKTEST SEARCHER")
     print("--------------------")
     results = []
@@ -42,6 +42,7 @@ def backtestLogger(models, data_tree, data, param, swap,write=False,verbose=Fals
                 results += [summary]
     
     results = pd.json_normalize(results)
+    results['trainPerformanceID'] = ID
     if write == True:
         results.to_csv(f"backtestLog-{str(datetime.now())[:19]}).csv",index=False)
     results = results.sort_values('totalPNL',ascending=False).reset_index(drop=True)
