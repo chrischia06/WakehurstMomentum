@@ -43,23 +43,23 @@ def statistics(df):
     sm.graphics.tsa.plot_pacf(df['log_returns'].values.squeeze(),lags=list(range(1,60,1)),ax=ax[2])
     return ax
 
-try:
-    with open("../assets.json") as f:
-        assets = json.load(f)
-except:
-    try:
-        with open("assets.json") as f:
-            assets = json.load(f)
-    except:
-        print("Failed to load assets file")
+# try:
+#     with open("../assets.json") as f:
+#         assets = json.load(f)
+# except:
+#     try:
+#         with open("assets.json") as f:
+#             assets = json.load(f)
+#     except:
+#         print("Failed to load assets file")
 
 
-datasets = widgets.Dropdown(
-    options=list(assets.keys()),
-    value='Brent Oil Futures',
-    description='Asset:',
-    disabled=False,
-)
+# datasets = widgets.Dropdown(
+#     options=list(assets.keys()),
+#     value='Brent Oil Futures',
+#     description='Asset:',
+#     disabled=False,
+# )
 
 def makeWidget(df3, exog_name):
     featsToUseWidget = widgets.SelectMultiple(

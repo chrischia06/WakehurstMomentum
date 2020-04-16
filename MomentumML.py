@@ -26,7 +26,7 @@ from tensorflow.keras.regularizers import l1, l2
 import shap
 import json
 
-def modelHistoricPredsWriter(preds, asset, ID, path=""):
+def modelHistoricPredsWriter(preds, asset, ID,param, train_end, train_start, LAGS, path=""):
     temp = pd.json_normalize(preds)
     temp['asset'] = asset
     temp['date'] = pd.to_datetime(datetime.now())

@@ -9,3 +9,5 @@ tensorboard
 xgboost
 catboost
 selenium
+shap
+empyrical
