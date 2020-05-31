@@ -42,7 +42,7 @@ def transformDF(df, swap=False):
         df2['Price'] = np.log(df2['Price'])
     #Volatility
     if 'High' in list(df2.columns) and 'Low' in df2.columns:
-        df2['IntradayRange'] = np.log(df2['High']/df2['Low']) #intraday range
+        # df2['IntradayRange'] = np.log(df2['High']/df2['Low']) #intraday range
         df2[['High','Low']] = np.log(df2[['High','Low']]) #log transform
         #normalizeFeats = ['Price','High','Low']
     else:
@@ -75,8 +75,8 @@ def transformDF(df, swap=False):
 
 
 
-feats = ['Price', 'High', 'Low', 'log_returns', 'IntradayRange']
-feats2 = ['log_returns','IntradayRange']
+feats = ['Price', 'High', 'Low', 'log_returns']
+feats2 = ['log_returns']
 def addLaggedFeats(df2, df3, LAGS):
     df4 = df2.copy()
     df5 = df3.copy()

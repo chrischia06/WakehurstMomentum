@@ -26,7 +26,7 @@ from tensorflow.keras.regularizers import l1, l2
 import shap
 import json
 
-def modelHistoricPredsWriter(preds, asset, ID,param, train_end, train_start, LAGS, path=""):
+def modelHistoricPredsWriter(preds, asset, ID,param, train_end, train_start, LAGS, hyperParams, path=""):
     temp = pd.json_normalize(preds)
     temp['asset'] = asset
     temp['date'] = pd.to_datetime(datetime.now())
@@ -139,7 +139,7 @@ def ensemble_df(models, data_tree, data, mode):
         temp['dnn'] = models['dnn'].predict(data).reshape(-1)
     return temp
 
-feats2 = ['log_returns','IntradayRange']
+feats2 = ['log_returns']
 def autofit(data_tree, data, normalizeFeats, hyperParams, LAGS, mode='regression'):
     models = {}
 
